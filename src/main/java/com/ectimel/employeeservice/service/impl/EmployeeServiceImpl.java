@@ -3,6 +3,7 @@ package com.ectimel.employeeservice.service.impl;
 import com.ectimel.employeeservice.dto.EmployeeDto;
 import com.ectimel.employeeservice.dto.EmployeesResponse;
 import com.ectimel.employeeservice.entity.Employee;
+import com.ectimel.employeeservice.exception.EmailAlreadyExistException;
 import com.ectimel.employeeservice.exception.ResourceNotFoundException;
 import com.ectimel.employeeservice.repository.EmployeeRepository;
 import com.ectimel.employeeservice.service.EmployeeService;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +33,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
+
+        Optional<Employee> employeeAsOptional = employeeRepository.findByEmail(employeeDto.getEmail());
+        if (employeeAsOptional.isPresent()) {
+            throw new EmailAlreadyExistException(employeeDto.getEmail());
+        }
 
         Employee employee = modelMapper.map(employeeDto, Employee.class);
 
@@ -64,15 +71,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .map(employee -> modelMapper.map(employee, EmployeeDto.class))
                 .toList();
 
-        EmployeesResponse employeesResponse = EmployeesResponse.builder()
+        return EmployeesResponse.builder()
                 .content(employeesDtoList)
                 .pageNo(pageNo)
                 .pageSize(pageSize)
                 .totalElements(employeesDtoList.size())
                 .last(employeesPage.isLast())
                 .build();
-
-        return employeesResponse;
     }
 
 }

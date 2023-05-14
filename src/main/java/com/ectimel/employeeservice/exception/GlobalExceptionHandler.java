@@ -1,24 +1,16 @@
 package com.ectimel.employeeservice.exception;
 
 import com.ectimel.employeeservice.dto.ErrorDetails;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDetails> resourceNotFound(ResourceNotFoundException exception, WebRequest webRequest) {
@@ -31,19 +23,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGlobalException(Exception exception, WebRequest webRequest) {
+    @ExceptionHandler(EmailAlreadyExistException.class)
+    public ResponseEntity<ErrorDetails> emailAlreadyExist(EmailAlreadyExistException exception, WebRequest webRequest){
 
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(),
                 exception.getMessage(),
                 webRequest.getDescription(false));
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
-
-
-
 
 
 }
