@@ -1,38 +1,48 @@
 package com.ectimel.employeeservice.service.impl;
 
+import com.ectimel.employeeservice.dto.ApiResponseDto;
+import com.ectimel.employeeservice.dto.DepartmentDto;
 import com.ectimel.employeeservice.dto.EmployeeDto;
 import com.ectimel.employeeservice.dto.EmployeesResponse;
 import com.ectimel.employeeservice.entity.Employee;
 import com.ectimel.employeeservice.exception.EmailAlreadyExistException;
 import com.ectimel.employeeservice.exception.ResourceNotFoundException;
 import com.ectimel.employeeservice.repository.EmployeeRepository;
+import com.ectimel.employeeservice.service.ApiClient;
 import com.ectimel.employeeservice.service.EmployeeService;
-import lombok.Builder;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
+//    private RestTemplate restTemplate;
+//    private WebClient webClient;
+    private ApiClient apiClient;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ModelMapper modelMapper) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, ModelMapper modelMapper, ApiClient apiClient) {
         this.employeeRepository = employeeRepository;
         this.modelMapper = modelMapper;
+//        this.restTemplate = restTemplate;
+//        this.webClient = webClient;
+        this.apiClient = apiClient;
     }
 
 
     @Override
-    public EmployeeDto createEmployee(EmployeeDto employeeDto) {
+    public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
 
         Optional<Employee> employeeAsOptional = employeeRepository.findByEmail(employeeDto.getEmail());
         if (employeeAsOptional.isPresent()) {
@@ -45,13 +55,32 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDto getEmployeeById(Long id) {
+    public ApiResponseDto getEmployeeById(Long id) {
 
         Employee employee = employeeRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", id));
 
-        return modelMapper.map(employee, EmployeeDto.class);
+//        REST TEMPLATE - DON'T USE
+//        ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity(
+//                "http://localhost:8080/api/v1/department/" + employee.getDepartmentCode(),
+//                DepartmentDto.class);
+//        DepartmentDto departmentDto = responseEntity.getBody();
+
+
+//        WEBFLUX
+//        DepartmentDto departmentDto = webClient.get()
+//                .uri("http://localhost:8080/api/v1/department/" + employee.getDepartmentCode())
+//                .retrieve()
+//                .bodyToMono(DepartmentDto.class)
+//                .block();
+
+//      SPRING CLOUD FEIGN
+        DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
+
+        return new ApiResponseDto(
+                modelMapper.map(employee, EmployeeDto.class),
+                departmentDto);
     }
 
     @Override

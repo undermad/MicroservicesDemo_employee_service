@@ -1,5 +1,6 @@
 package com.ectimel.employeeservice.controller;
 
+import com.ectimel.employeeservice.dto.ApiResponseDto;
 import com.ectimel.employeeservice.dto.EmployeeDto;
 import com.ectimel.employeeservice.dto.EmployeesResponse;
 import com.ectimel.employeeservice.service.EmployeeService;
@@ -19,8 +20,8 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
-        EmployeeDto employeeDto = employeeService.getEmployeeById(id);
+    public ResponseEntity<ApiResponseDto> getEmployeeById(@PathVariable Long id) {
+        ApiResponseDto employeeDto = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(employeeDto);
     }
 
@@ -38,7 +39,7 @@ public class EmployeeController {
     @PostMapping
     public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
 
-        EmployeeDto createdEmployee = employeeService.createEmployee(employeeDto);
+        EmployeeDto createdEmployee = employeeService.saveEmployee(employeeDto);
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
 
