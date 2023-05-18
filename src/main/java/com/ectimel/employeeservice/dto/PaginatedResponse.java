@@ -9,9 +9,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EmployeesResponse {
+public class PaginatedResponse<T> {
 
-    private List<EmployeeDto> content;
+    private List<T> content;
 
     private int pageNo;
     private int pageSize;

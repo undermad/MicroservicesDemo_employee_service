@@ -2,7 +2,7 @@ package com.ectimel.employeeservice.controller;
 
 import com.ectimel.employeeservice.dto.ApiResponseDto;
 import com.ectimel.employeeservice.dto.EmployeeDto;
-import com.ectimel.employeeservice.dto.EmployeesResponse;
+import com.ectimel.employeeservice.dto.PaginatedResponse;
 import com.ectimel.employeeservice.service.EmployeeService;
 import com.ectimel.employeeservice.utility.AppConstants;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public ResponseEntity<EmployeesResponse> getAllEmployees(
+    public ResponseEntity<PaginatedResponse> getAllEmployees(
             @RequestParam(name = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NO, required = false) int pageNo,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,

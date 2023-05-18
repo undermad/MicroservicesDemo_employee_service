@@ -3,7 +3,7 @@ package com.ectimel.employeeservice.service.impl;
 import com.ectimel.employeeservice.dto.ApiResponseDto;
 import com.ectimel.employeeservice.dto.DepartmentDto;
 import com.ectimel.employeeservice.dto.EmployeeDto;
-import com.ectimel.employeeservice.dto.EmployeesResponse;
+import com.ectimel.employeeservice.dto.PaginatedResponse;
 import com.ectimel.employeeservice.entity.Employee;
 import com.ectimel.employeeservice.exception.EmailAlreadyExistException;
 import com.ectimel.employeeservice.exception.ResourceNotFoundException;
@@ -11,24 +11,22 @@ import com.ectimel.employeeservice.repository.EmployeeRepository;
 import com.ectimel.employeeservice.service.ApiClient;
 import com.ectimel.employeeservice.service.EmployeeService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
-//    private RestTemplate restTemplate;
+    //    private RestTemplate restTemplate;
 //    private WebClient webClient;
     private ApiClient apiClient;
 
@@ -59,7 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee employee = employeeRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", String.valueOf(id)));
 
 //        REST TEMPLATE - DON'T USE
 //        ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity(
@@ -76,7 +74,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 //                .block();
 
 //      SPRING CLOUD FEIGN
-        DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode());
+
+        DepartmentDto departmentDto = apiClient.getDepartmentByCode(employee.getDepartmentCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Department", "code", employee.getDepartmentCode()));
+
 
         return new ApiResponseDto(
                 modelMapper.map(employee, EmployeeDto.class),
@@ -84,7 +85,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeesResponse getAllEmployee(int pageNo, int pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<EmployeeDto> getAllEmployee(int pageNo, int pageSize, String sortBy, String sortDir) {
 
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
@@ -98,9 +99,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<EmployeeDto> employeesDtoList = employeesList
                 .stream()
                 .map(employee -> modelMapper.map(employee, EmployeeDto.class))
-                .toList();
+                .collect(Collectors.toList());
 
-        return EmployeesResponse.builder()
+        // use <T> after . before builder() as in example below
+        return PaginatedResponse.<EmployeeDto>builder()
                 .content(employeesDtoList)
                 .pageNo(pageNo)
                 .pageSize(pageSize)
