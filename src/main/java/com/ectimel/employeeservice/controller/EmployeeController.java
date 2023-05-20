@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/employee")
+@RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
     private EmployeeService employeeService;
@@ -26,7 +26,7 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginatedResponse> getAllEmployees(
+    public ResponseEntity<PaginatedResponse<EmployeeDto>> getAllEmployees(
             @RequestParam(name = "pageNo", defaultValue = AppConstants.DEFAULT_PAGE_NO, required = false) int pageNo,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
